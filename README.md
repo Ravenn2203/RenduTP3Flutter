@@ -1,6 +1,7 @@
 # TP3 Flutter : Firebase
 
 >Le dépôt contient un répertoire correspondant au projet de quizz fait lors du tp2 pour l'exercice des cubits/blocs
+TODO
 
 >Lors du développement j'ai effectué mes tests avec un émulateur Android : Le Pixel 3 (API 30).
 
