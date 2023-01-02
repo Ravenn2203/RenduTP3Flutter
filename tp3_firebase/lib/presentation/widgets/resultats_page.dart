@@ -29,9 +29,8 @@ class _ResultatsPageState extends State<ResultatsPage> {
           child: Text(
               'Vous avez répondu correctement à ' +
                   Provider.of<QuizzCubit>(context, listen: false).nbBonnesReponses.toString() +
-                  ' questions sur ' +
-                  Provider.of<QuizzCubit>(context, listen: false).nbQuestions.toString() +
-                  '! Ce qui vous fait un score de : '+Provider.of<QuizzCubit>(context, listen: false).nbBonnesReponses.toString()+'/'+Provider.of<QuizzCubit>(context, listen: false).nbQuestions.toString(),
+                  ' questions !'+
+                  ' Ce qui vous fait un score de : '+Provider.of<QuizzCubit>(context, listen: false).nbBonnesReponses.toString()+'/'+Provider.of<QuizzCubit>(context, listen: false).compteurQuestionsCollectionFirebase.toString(),
               style: TextStyle(
                 color: Colors.white,
                 letterSpacing: 2.0,

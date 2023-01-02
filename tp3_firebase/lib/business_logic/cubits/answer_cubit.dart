@@ -1,64 +1,92 @@
-import 'dart:ui';
-
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:tp2/data/models/question.dart';
-import 'package:tp2/data/repositories/question_repository.dart';
-
-import '../../data/dataproviders/fire_store_tp3.dart';
 
 part 'answer_state.dart';
 
 class QuizzCubit extends Cubit<QuizzState> {
-  QuizzCubit() : super(QuizzInitial());
-  QuestionRepository questionRepository = QuestionRepository();
-  //Question question = QuestionRepository().getFirstQuestion();
-  Question questionFireBase = QuestionRepository().getFirstQuestion();
+  QuizzCubit() : super(QuizLoading()) {}
 
-  Color vrai = Colors.grey;
-  Color faux = Colors.grey;
-  bool aRepondu = false;
-  int nbQuestions = 7;
-  int nbBonnesReponses = 0;
-  int numQuestion = 7;
+  //Instance de notre base de données
   var db = FirebaseFirestore.instance;
 
-  void changeButtonsColor(Color vrai, Color faux) {
+  //Collection de questions obtenues de firebase
+  QuerySnapshot<Map<String, dynamic>>? collectionQuestions;
+
+  //Compteur qui parcours la collection
+  int compteurQuestionsCollectionFirebase = 0;
+
+  //Compteur du nombre de bonnes réponses
+  int nbBonnesReponses = 0;
+
+  //Question actuelle
+  Question? question;
+
+  //Stocke les couleurs des boutons
+  Color vrai = Colors.grey;
+  Color faux = Colors.grey;
+
+  //Permet de vérifier si l'utilisateur a répondu et si on peut passer à la question suivante ou non
+  bool aRepondu = false;
+
+  void changeButtonsColor(Color newVrai, Color newFaux) {
+    //L'utilisateur a répondu on colorie les boutons de la bonne manière
     aRepondu = true;
-    this.vrai = vrai;
-    this.faux = faux;
-    emit(QuizzColorsLoaded());
+    this.vrai = newVrai;
+    this.faux = newFaux;
+    emit(QuizzAnswered());
   }
 
-  /*void prochaineQuestion(Color vrai, Color faux) {
-    numQuestion--;
-    question = questionRepository.getNextQuestion(numQuestion);
-    emit(QuizzNextQuestionLoaded());
-    vrai = Colors.grey;
-    faux = Colors.grey;
-    aRepondu = false;
-  }*/
+  bool nextQuestionAvailable() {
+    return !(compteurQuestionsCollectionFirebase == collectionQuestions?.size);
+  }
 
-  void afficherResultats() {
-    //TODO il faut utilise un listener là
+  void nextQuestion() {
+    if (nextQuestionAvailable()) {
+      QueryDocumentSnapshot<Map<String, dynamic>>? nouvelleQuestion = collectionQuestions?.docs.elementAt(compteurQuestionsCollectionFirebase);
+      question = Question(questionText: nouvelleQuestion?['questionText'],
+          isCorrect: nouvelleQuestion?['isCorrect'],
+          imagePath: nouvelleQuestion?['imagePath']);
+      compteurQuestionsCollectionFirebase++;
+      vrai = Colors.grey;
+      faux = Colors.grey;
+      aRepondu = false;
+      emit(QuizzLoaded());
+    }
   }
 
   void augmenterBonnesReponses() {
-      nbBonnesReponses++;
-      print('bonne réponse!');
+    nbBonnesReponses++;
+    print('bonne réponse!');
   }
 
-  void retrieveData() async {
+  Future<void> retrieveData(String categorie) async {
+    //On attend que les données soient récupérées
+    emit(QuizLoading());
 
-    print('je passe ici');
+    QuerySnapshot<Map<String, dynamic>> retrievedData = await db.collection(categorie).get();
+    collectionQuestions = retrievedData;
 
-    DocumentSnapshot snapshot = await db.collection('superHeros').doc('wolverine').get();
-    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-    questionFireBase = Question(questionText: data['questionText'], isCorrect: data['isCorrect'], imagePath: data['imagePath']);
+    retrievedData.docs.forEach((doc) {
+      print('Document récupéré :'+doc.data().toString());
+    });
 
-    emit(QuizzDataLoaded());
+    nextQuestion();
+
+    //On a récupéré les données
+    emit(QuizzLoaded());
+
+  }
+
+  void restartQuizz(){
+    compteurQuestionsCollectionFirebase=0;
+    nbBonnesReponses=0;
+  }
+
+  int? getNombreQuestions(){
+    return collectionQuestions?.size;
   }
 
 }

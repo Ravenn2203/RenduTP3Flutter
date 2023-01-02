@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tp2/business_logic/cubits/answer_cubit.dart';
-import 'package:tp2/data/dataproviders/fire_store_tp3.dart';
+import 'package:tp2/business_logic/cubits/creation_cubit.dart';
+import 'package:tp2/presentation/widgets/creation_question_page.dart';
+import 'package:tp2/presentation/widgets/home_page.dart';
+import 'package:tp2/presentation/widgets/quizz_theme_page.dart';
 import 'package:tp2/presentation/widgets/resultats_page.dart';
 import 'presentation/widgets/quizz_page.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -12,8 +15,10 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  FireStoreTP3();
   runApp(MultiBlocProvider(providers: [
+    BlocProvider<CreationCubit>(
+      create: (context) => CreationCubit(),
+    ),
     BlocProvider<QuizzCubit>(
       create: (context) => QuizzCubit(),
     ),
@@ -39,9 +44,12 @@ class MyTp2App extends StatelessWidget {
       //Le widget de la page d'accueil
       initialRoute: '/',
       routes: {
-        '/': (context) => QuizzPage(),
+        '/': (context) => HomePage(),
+        '/themes' : (context) => QuizzThemePage(0),
         '/quizz': (context) => QuizzPage(),
+        '/themesCreationQuestion' : (context) =>QuizzThemePage(1),
         '/resultats': (context) => ResultatsPage(),
+        '/creationQuestion' : (context) => CreationQuestionPage(),
       },
     );
   }

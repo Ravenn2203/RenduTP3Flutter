@@ -3,10 +3,11 @@ part of 'answer_cubit.dart';
 @immutable
 abstract class QuizzState {}
 
-class QuizzInitial extends QuizzState {}
+//Etat appelé à la construction du cubit
+class QuizLoading extends QuizzState {}
 
-class QuizzColorsLoaded extends QuizzState {}
+class QuizzLoaded extends QuizzState {}
 
-class QuizzNextQuestionLoaded extends QuizzState {}
+class QuizzAnswered extends QuizzState{}
 
-  class QuizzDataLoaded extends QuizzState{}
+class QuizzError extends QuizzState {}
